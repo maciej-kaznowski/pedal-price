@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+
+  sigma-sports-scraper:
+    build:
+      context: sigma_sports_scraper
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"

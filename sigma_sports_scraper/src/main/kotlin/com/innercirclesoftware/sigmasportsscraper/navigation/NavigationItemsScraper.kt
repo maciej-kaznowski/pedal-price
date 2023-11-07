@@ -33,7 +33,7 @@ class NavigationItemsScraper(
                     logger.warn("Failed to scrape messages: {}", error)
                 }
                 .onRight { categories ->
-                    categoryService.all = categories
+                    categoryService.upsertCategoryUrls(categories)
                 }
     }
 

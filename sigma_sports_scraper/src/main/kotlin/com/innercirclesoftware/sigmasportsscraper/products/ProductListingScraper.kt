@@ -60,7 +60,7 @@ class ProductListingScraper(
     }
 
     fun getProductListings(): IorNel<ProductListingScrapeError, List<SigmaSportsListingProduct>> {
-        return categoryService.all.right()
+        return categoryService.getAllCategoryUrls().right()
                 .map { categories -> categories.map(::getParsedCategoryResponses) }
                 .toIor()
                 .flatMap(combine = { e1, e2 -> e1 + e2 }) { r: List<Either<ProductListingScrapeError, List<SigmaSportsListingProduct>>> ->

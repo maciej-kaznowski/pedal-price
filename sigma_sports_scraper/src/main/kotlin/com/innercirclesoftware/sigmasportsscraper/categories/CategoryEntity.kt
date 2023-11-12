@@ -19,8 +19,10 @@ class CategoryEntity(
         var id: UUID = randomUUID(),
 
         @Column
-        var url: String
+        var url: String,
 
+        @Column
+        var listing: Boolean = true,
 ) {
 
     @CreationTimestamp

@@ -1,8 +1,8 @@
 package com.innercirclesoftware.sigmasportsscraper.categories
 
 import arrow.core.getOrElse
-import com.innercirclesoftware.sigmasportsscraper.utils.toUri
 import com.innercirclesoftware.sigmasportsscraper.utils.runAfterCommit
+import com.innercirclesoftware.sigmasportsscraper.utils.toUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -58,5 +58,16 @@ class CategoryService(
                 .map { it.url }
                 .map(URI::create)
                 .toList()
+    }
+
+    @Transactional
+    fun updateInvalidListing(url: URI) {
+        logger.info("Updating invalid listings for url $url")
+        val categories = categoryRepository.findAllByUrlIn(listOf(url.toString()))
+        categories.forEach {
+            it.listing = false
+        }
+
+        categoryRepository.saveAll(categories)
     }
 }

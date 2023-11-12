@@ -9,11 +9,9 @@ import com.innercirclesoftware.sigmasportsscraper.utils.mapRight
 import com.innercirclesoftware.sigmasportsscraper.utils.right
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.net.URI
-import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
@@ -28,11 +26,11 @@ class ProductListingScraper(
     private val logger: Logger = LoggerFactory.getLogger(ProductListingScraper::class.java)
 
     @OptIn(ExperimentalTime::class)
-    @Scheduled(
-            fixedDelay = 60 * 60, /* 1 hour*/
-            initialDelay = 15,
-            timeUnit = SECONDS,
-    )
+//    @Scheduled(
+//            fixedDelay = 60 * 60, /* 1 hour*/
+//            initialDelay = 15,
+//            timeUnit = SECONDS,
+//    )
     fun updateProductListings() {
         logger.info("Updating product listings")
 
@@ -104,6 +102,18 @@ class ProductListingScraper(
                             .flatten()
                 }
                 .flatten()
+    }
+
+    fun getScrapableListing(uri: URI): Either<ScrapableListing.Error, ScrapableListing> {
+        return pageSourceFetcher.getPageSource(uri)
+                .mapLeft(ScrapableListing.Error::SourceFetchError)
+                .flatMap { body ->
+                    Either.catch { body.use { productListingResponseParser.parseScrapableListing(uri, it) } }
+                            .fold(
+                                    ifLeft = { cause -> ScrapableListing.Error.UnknownError("Unhandled exception caught parsing scrapable listing", cause).left() },
+                                    ifRight = { it }
+                            )
+                }
     }
 }
 

@@ -6,18 +6,24 @@ import arrow.core.raise.ensureNotNull
 import com.innercirclesoftware.sigmasportsscraper.models.Money
 import com.innercirclesoftware.sigmasportsscraper.utils.document
 import com.innercirclesoftware.sigmasportsscraper.utils.toNullIfBlank
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 import org.jsoup.select.Elements
 import org.springframework.stereotype.Component
+import org.springframework.web.util.UriComponentsBuilder
 import java.io.IOException
 import java.io.InputStream
 import java.math.BigDecimal
 import java.net.URI
 import java.util.*
+import kotlin.math.ceil
 
 private const val LISTING_PRODUCTS_ID = "js-listing-products"
 private const val LISTING_PRODUCT_ID = "js-listing-product"
+private const val LISTING_PROGRESS_BAR_ID = "js-listing-progress-bar"
+
+private const val PRODUCTS_PER_LISTING_PAGE = 20
 
 @Component
 class ProductListingResponseParser {
@@ -133,6 +139,74 @@ class ProductListingResponseParser {
                                 ifRight = { it }
                         )
         )
+    }
+
+    fun parseScrapableListing(url: URI, body: InputStream): Either<ScrapableListing.Error, ScrapableListing> {
+        return Either.catch { body.document() }
+                .mapLeft { cause ->
+                    if (cause is IOException) {
+                        ScrapableListing.Error.BodyParsingError(cause)
+                    } else {
+                        ScrapableListing.Error.UnknownError("Internal error parsing response", cause)
+                    }
+                }
+                .flatMap { document -> parseScrapableListing(url, document) }
+    }
+
+    private fun parseScrapableListing(url: URI, document: Document): Either<ScrapableListing.Error, ScrapableListing> {
+        val hasProductsListing = document.getElementById(LISTING_PRODUCTS_ID) != null
+        if (!hasProductsListing) {
+            return ScrapableListing.Error.NotAListing("Page does not contain a products listing element with id '$LISTING_PRODUCTS_ID'")
+                    .left()
+        }
+
+        return parseScrapableListingTotalPages(document)
+                .map { pages ->
+                    pages to (1..pages).map { page ->
+                        UriComponentsBuilder.fromUri(url)
+                                .replaceQueryParam("p", page)
+                                .build()
+                                .toUri()
+                    }
+                }
+                .flatMap { (pageCount, pages) ->
+                    pages.toNonEmptyListOrNone()
+                            .toEither { ScrapableListing.Error.NotAListing("Listing does not contain any pages according to the progress bar. pageCount=$pageCount") }
+                }
+                .map { pages ->
+                    ScrapableListing(
+                            title = document.title().toNullIfBlank(),
+                            pages = pages,
+                    )
+                }
+    }
+
+    /**
+     * Determine the number of pages the listing has according to the progress bar
+     */
+    private fun parseScrapableListingTotalPages(document: Document): Either<ScrapableListing.Error, Int> {
+        return document.getElementById(LISTING_PROGRESS_BAR_ID)
+                .toOption()
+                .toEither { ScrapableListing.Error.NotAListing("Page does not contain a progress bar with ID '$LISTING_PROGRESS_BAR_ID'") }
+                .flatMap { progressBar ->
+                    progressBar.attr("max").toNullIfBlank()
+                            .toOption()
+                            .toEither { ScrapableListing.Error.NotAListing("Page does not contain a progress bar with ID '$LISTING_PROGRESS_BAR_ID'") }
+                }
+                .flatMap { max ->
+                    max.toIntOrNull()
+                            .toOption()
+                            .toEither { ScrapableListing.Error.NotAListing("Progress bar max value is not an integer: '$max'") }
+                }
+                .flatMap { pages ->
+                    if (pages < 0) {
+                        return ScrapableListing.Error.NotAListing("Progress bar has a negative count of products: '$pages'")
+                                .left()
+                    } else {
+                        pages.right()
+                    }
+                }
+                .map { max -> ceil(max.toDouble().div(PRODUCTS_PER_LISTING_PAGE)).toInt() }
     }
 }
 

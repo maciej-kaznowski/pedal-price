@@ -59,7 +59,7 @@ class ProductListingScraper(
 
     fun getProductListings(): IorNel<ProductListingScrapeError, List<SigmaSportsListingProduct>> {
         return categoryService.getAllCategoryUrls().right()
-                .map { categories -> categories.map(::getParsedCategoryResponses) }
+                .map { categories -> categories.map(::getListingsProducts) }
                 .toIor()
                 .flatMap(combine = { e1, e2 -> e1 + e2 }) { r: List<Either<ProductListingScrapeError, List<SigmaSportsListingProduct>>> ->
                     r.separateEither()
@@ -74,8 +74,8 @@ class ProductListingScraper(
                 }
     }
 
-    private fun getParsedCategoryResponses(category: URI): Either<ProductListingScrapeError, List<SigmaSportsListingProduct>> {
-        return pageSourceFetcher.getPageSource(category)
+    fun getListingsProducts(listingUrl: URI): Either<ProductListingScrapeError, List<SigmaSportsListingProduct>> {
+        return pageSourceFetcher.getPageSource(listingUrl)
                 .mapLeft<ProductListingScrapeError> { pageSourceFetchError ->
                     ProductListingScrapeError.SourceFetchError(pageSourceFetchError)
                 }
@@ -85,14 +85,14 @@ class ProductListingScraper(
                                 when (cause) {
                                     is IOException -> {
                                         ProductListingScrapeError.UnknownError(
-                                                message = "IO Error processing category '$category'",
+                                                message = "IO Error processing listing '$listingUrl'",
                                                 cause = cause,
                                         )
                                     }
 
                                     else -> {
                                         ProductListingScrapeError.UnknownError(
-                                                message = "Internal error when processing category '$category'",
+                                                message = "Internal error when processing listing '$listingUrl'",
                                                 cause = cause,
                                         )
                                     }

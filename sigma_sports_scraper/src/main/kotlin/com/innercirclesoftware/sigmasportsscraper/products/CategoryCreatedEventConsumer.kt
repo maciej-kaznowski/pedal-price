@@ -26,7 +26,7 @@ class CategoryCreatedEventConsumer(
 @Component
 class CategoryCreatedEventHandler(
         private val productListingScraper: ProductListingScraper,
-        private val scrapableListingsProducer: KafkaTemplate<String, ScrapableListing>,
+        private val scrapableListingPagesProducer: KafkaTemplate<String, ScrapableListingPage>,
         private val invalidListingsProducer: KafkaTemplate<String, InvalidListing>,
 ) : BiConsumer<CategoryCreatedEvent, Acknowledgment> {
 
@@ -40,7 +40,9 @@ class CategoryCreatedEventHandler(
 
     private fun handleSuccess(scrapableListing: ScrapableListing, ack: Acknowledgment) {
         logger.info("Fetched scrapable listing: $scrapableListing")
-        scrapableListingsProducer.send("scrapable-listings", scrapableListing)
+        scrapableListing.pages.map(::ScrapableListingPage).forEach { page ->
+            scrapableListingPagesProducer.send("scrapable-listing-pages", page)
+        }
         ack.acknowledge()
     }
 

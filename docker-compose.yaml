@@ -12,6 +12,7 @@ services:
       DB_URL: jdbc:postgresql://db:5432/pedalprice
       DB_USERNAME: root
       DB_PASSWORD: root
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
 
   product-store:
     build:
@@ -23,6 +24,7 @@ services:
       DB_URL: jdbc:postgresql://db:5432/pedalprice
       DB_USERNAME: root
       DB_PASSWORD: root
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
 
   db:
     build:

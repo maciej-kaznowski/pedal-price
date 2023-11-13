@@ -10,3 +10,4 @@
 rootProject.name = 'pedal-price'
 
 include ':sigma_sports_scraper'
+include ':product-store'

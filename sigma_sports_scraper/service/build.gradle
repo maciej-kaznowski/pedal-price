@@ -41,6 +41,8 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+    implementation 'org.jsoup:jsoup:1.16.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'io.arrow-kt:arrow-core:1.2.0'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'

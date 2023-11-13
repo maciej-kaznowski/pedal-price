@@ -25,13 +25,15 @@ services:
       DB_PASSWORD: root
 
   db:
-    image: postgres:16.0-alpine
+    build:
+      context: docker
+      dockerfile: db.Dockerfile
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: pedalprice
     ports:
       - "5432:5432"
+
   broker:
     image: confluentinc/cp-kafka:7.5.1
     hostname: broker

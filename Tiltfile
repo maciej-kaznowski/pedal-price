@@ -4,7 +4,17 @@ docker_build(
   dockerfile = './sigma_sports_scraper/Dockerfile.dev',
   only = [
     'Dockerfile.dev',
-    'build/libs/sigma_sports_scraper-0.0.1-SNAPSHOT.jar'
+    'service/build/libs/service-0.0.1-SNAPSHOT.jar'
+  ],
+)
+
+docker_build(
+  ref = 'tilt-product-store',
+  context = './product-store',
+  dockerfile = './product-store/Dockerfile.dev',
+  only = [
+    'Dockerfile.dev',
+    'build/libs/product-store-0.0.1-SNAPSHOT.jar'
   ],
 )
 
@@ -15,6 +25,10 @@ docker_compose([
       "sigma-sports-scraper": {
         "build": {},
         "image": "tilt-sigma-sports-scraper"
+      },
+      "product-store": {
+        "build": {},
+        "image": "tilt-product-store"
       }
     }
   })

@@ -49,6 +49,12 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql:42.2.27'
 
+
+    def bucket4jVersion = '8.7.0'
+    implementation "com.bucket4j:bucket4j-core:$bucket4jVersion"
+    implementation "com.bucket4j:bucket4j-postgresql:$bucket4jVersion"
+
+
     // Testing dependencies
     def kotestVersion = '5.7.2'
     testImplementation "io.kotest:kotest-runner-junit5:$kotestVersion"

@@ -3,20 +3,37 @@ package com.innercirclesoftware.sigmasportsscraper.http
 import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.toOption
+import io.github.bucket4j.BlockingBucket
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.io.InputStream
 import java.net.URI
+import java.time.Duration
+import kotlin.time.measureTime
 
 @Component
 class PageSourceFetcher(
-        @Qualifier("sigmaSportsOkHttpClient") private val httpClient: OkHttpClient
+        @Qualifier("sigmaSportsOkHttpClient") private val httpClient: OkHttpClient,
+        private val bucket: BlockingBucket,
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(PageSourceFetcher::class.java)
+
     fun getPageSource(url: URI): Either<PageSourceFetchError, InputStream> {
+        if (!bucket.tryConsume(1L, Duration.ofNanos(1L))) {
+            logger.info("Rate limited fetch of URL $url")
+            measureTime { bucket.consume(1L) }.also { duration ->
+                logger.info("Fetching URL $url after waiting $duration for rate limiter")
+            }
+        } else {
+            logger.info("Fetching URL $url")
+        }
+
         return url.toHttpUrlOrNull()
                 .toOption()
                 .toEither { PageSourceFetchError.InvalidUrl(url) }

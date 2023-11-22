@@ -18,6 +18,16 @@ docker_build(
   ],
 )
 
+docker_build(
+  ref = 'tilt-user-watching-service',
+  context = './user-watching-service',
+  dockerfile = './user-watching-service/Dockerfile.dev',
+  only = [
+    'Dockerfile.dev',
+    'service/build/libs/service-0.0.1-SNAPSHOT.jar'
+  ],
+)
+
 docker_compose([
   "./docker-compose.yaml",
   encode_yaml({
@@ -29,6 +39,10 @@ docker_compose([
       "product-store": {
         "build": {},
         "image": "tilt-product-store"
+      },
+      "user-watching-service": {
+        "build": {},
+        "image": "tilt-user-watching-service"
       }
     }
   })

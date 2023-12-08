@@ -1,8 +1,10 @@
 package com.innercirclesoftware.userwatchingservice.products
 
+import com.innercirclesoftware.sigmasportsscraperapi.Money
 import com.innercirclesoftware.userwatchingservice.api.products.PriceMatchValue
 import com.innercirclesoftware.userwatchingservice.api.products.ProductWatch
 import com.innercirclesoftware.userwatchingservice.api.products.StringMatchValue
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +25,17 @@ class ProductWatchService(
     fun findAll(): List<ProductWatch> {
         return repository.findAll(Sort.by("createdAt", "id"))
                 .map { it.toApi() }
+    }
+
+    @Transactional(readOnly = true)
+    fun findMatchingWatches(name: String, brand: String, category: String, price: Money, discountPercent: Double): List<ProductWatch> {
+        return repository.findMatchingWatches(
+                name = name,
+                brand = brand,
+                category = category,
+                price = price.amount,
+                discountPercent = discountPercent
+        ).map { it.toApi() }
     }
 }
 

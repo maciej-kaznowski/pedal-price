@@ -34,18 +34,26 @@ repositories {
 
 dependencies {
     // internal dependencies
-    implementation project(':user-watching-service:api')
+    implementation project(':sigma-sports-scraper-api')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+    implementation 'org.jsoup:jsoup:1.16.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'io.arrow-kt:arrow-core:1.2.0'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql:42.2.27'
+
+
+    def bucket4jVersion = '8.7.0'
+    implementation "com.bucket4j:bucket4j-core:$bucket4jVersion"
+    implementation "com.bucket4j:bucket4j-postgresql:$bucket4jVersion"
+
 
     // Testing dependencies
     def kotestVersion = '5.7.2'

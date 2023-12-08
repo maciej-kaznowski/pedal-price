@@ -9,8 +9,8 @@
 
 rootProject.name = 'pedal-price'
 
-include ':sigma_sports_scraper:api'
-include ':sigma_sports_scraper:service'
-include ':product-store'
-include ':user-watching-service:api'
-include ':user-watching-service:service'
+include 'sigma-sports-scraper-api',
+        'sigma-sports-scraper-service',
+        'product-store-service',
+        'user-watching-service-api',
+        'user-watching-service'

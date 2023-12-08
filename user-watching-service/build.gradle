@@ -34,7 +34,8 @@ repositories {
 
 dependencies {
     // internal dependencies
-    implementation project(':sigma_sports_scraper:api')
+    implementation project(':sigma-sports-scraper-api')
+    implementation project(':user-watching-service-api')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

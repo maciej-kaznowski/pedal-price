@@ -4,24 +4,24 @@ services:
 
   sigma-sports-scraper:
     build:
-      context: sigma_sports_scraper
+      context: sigma-sports-scraper-service
       dockerfile: Dockerfile.dev
     ports:
       - "8080:8080"
     environment:
-      DB_URL: jdbc:postgresql://db:5432/pedalprice
+      DB_URL: jdbc:postgresql://db:5432/pedalprice?currentSchema=sigma_sports_scraper
       DB_USERNAME: root
       DB_PASSWORD: root
       KAFKA_BOOTSTRAP_SERVERS: broker:29092
 
   product-store:
     build:
-      context: product-store
+      context: product-store-service
       dockerfile: Dockerfile.dev
     ports:
       - "8081:8081"
     environment:
-      DB_URL: jdbc:postgresql://db:5432/pedalprice
+      DB_URL: jdbc:postgresql://db:5432/pedalprice?currentSchema=product_store
       DB_USERNAME: root
       DB_PASSWORD: root
       KAFKA_BOOTSTRAP_SERVERS: broker:29092
@@ -33,7 +33,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      DB_URL: jdbc:postgresql://db:5432/user_watching_service
+      DB_URL: jdbc:postgresql://db:5432/pedalprice?currentSchema=user_watching_service
       DB_USERNAME: root
       DB_PASSWORD: root
       KAFKA_BOOTSTRAP_SERVERS: broker:29092
